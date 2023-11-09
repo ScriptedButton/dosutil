@@ -1,0 +1,154 @@
+#!/bin/bash
+
+# Cole Brooks
+# A simple Bash script used to streamline common functions in Linux.
+# Last Rev. 11/8/2023
+# command - the command to invoke within dosutil
+# param1 - the first command parameter
+# param2 - the second command parameter
+
+# Function to display the help message
+display_help() {
+    echo "Supported commands:"
+    echo "author - output your name in the form last, first"
+    echo "type - output the content of the file in the first parameter"
+    echo "copy - copy a file or directory"
+    echo "ren - rename a file or directory"
+    echo "move - move a file or directory"
+    echo "del - delete a file or directory (without asking for confirmation)"
+    echo "help - output a list of supported commands, their action, and required parameters"
+}
+
+# Function to execute file manipulation commands and verify success
+execute_command() {
+    local args=("$@")  # Store all arguments in an array
+    local command="${args[0]}"  # Get the command from the first argument
+    local params=("${args[@]:1}")  # Get the remaining arguments as parameters
+
+    echo "UNIX command ran: $command ${params[*]}"
+
+    if "$command" "${params[@]}" >/dev/null 2>&1; then
+        echo "Command successfully completed."
+    else
+        echo "Command failed to execute."
+    fi
+}
+
+# Function to verify if a file exists and its type (regular file or directory)
+verify_file() {
+    local file=$1
+    if [ -e "$file" ]; then
+        if [ -f "$file" ]; then
+            echo "File '$file' exists."
+        elif [ -d "$file" ]; then
+            echo "Directory '$file' exists."
+        else
+            echo "Unknown type: '$file'"
+        fi
+    else
+        echo "File or directory '$file' does not exist."
+    fi
+}
+
+# Function to copy a file or directory
+copy_file() {
+    verify_file "$1"
+    if [ -e "$2" ]; then
+        echo "File or directory '$2' already exists. Use 'copy!' to overwrite."
+    else
+        execute_command "cp" "-r" "$1" "$2"
+    fi
+}
+
+# Function to copy a file or directory, overwriting if necessary
+copy_file_overwrite() {
+    verify_file "$1"
+    execute_command "cp" "-rf" "$1" "$2"
+}
+
+# Function to rename a file or directory
+rename_file() {
+    verify_file "$1"
+    if [ -e "$2" ]; then
+        echo "File or directory '$2' already exists. Use 'ren!' to overwrite."
+    else
+        execute_command "mv" "$1" "$2"
+    fi
+}
+
+# Function to rename a file or directory, overwriting if necessary
+rename_file_overwrite() {
+    verify_file "$1"
+    execute_command "mv" "$1" "$2"
+}
+
+# Function to move a file or directory
+move_file() {
+    verify_file "$1"
+    if [ -e "$2" ]; then
+        echo "File or directory '$2' already exists. Use 'move!' to overwrite."
+    else
+        execute_command "mv" "$1" "$2"
+    fi
+}
+
+# Function to move a file or directory, overwriting if necessary
+move_file_overwrite() {
+    verify_file "$1"
+    execute_command "mv" "-f" "$1" "$2"
+}
+
+# Function to delete a file or directory
+delete_file() {
+    local file="$1"
+
+    verify_file "$file"
+
+    if [ -e "$file" ]; then
+        execute_command "rm" "-rf" "$file"
+    fi
+}
+
+# Parse command line options
+while getopts ":" opt; do
+    case $opt in
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            display_help
+            exit 1 ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+command=$1
+param1=$2
+param2=$3
+
+case $command in
+    author)
+        echo "Brooks, Cole" ;;
+    type)
+        verify_file "$param1"
+        if [ -f "$param1" ]; then
+            cat "$param1"
+        fi ;;
+    copy)
+        copy_file "$param1" "$param2" ;;
+    copy!)
+        copy_file_overwrite "$param1" "$param2" ;;
+    ren)
+        rename_file "$param1" "$param2" ;;
+    ren!)
+        rename_file_overwrite "$param1" "$param2" ;;
+    move)
+        move_file "$param1" "$param2" ;;
+    move!)
+        move_file_overwrite "$param1" "$param2" ;;
+    del)
+        delete_file "$param1" ;;
+    help)
+        display_help ;;
+    *)
+        echo "Invalid parameter. Please use the 'help' command for a list of supported commands." ;;
+esac
