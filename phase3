@@ -180,30 +180,41 @@ fi
 
 # Interactive mode
 echo "Entering interactive mode..."
-PS3="Please select a file or directory: "
+PS3="Please select a sorting option: "
 
-list_and_sort_files
-
-select file in "${files[@]}" "Quit"; do
-    case $file in
+select sort_option in "name" "age" "size" "Quit"; do
+    case $sort_option in
         "Quit")
             echo "Exiting interactive mode."
             exit 0
             ;;
         *)
-            PS3="Please select a command: "
-            select cmd in "type" "copy" "copy!" "ren" "ren!" "move" "move!" "del" "help" "Quit"; do
-                case $cmd in
+            list_and_sort_files "$sort_option"
+            PS3="Please select a file or directory: "
+            select file in "${files[@]}" "Quit"; do
+                case $file in
                     "Quit")
                         echo "Exiting interactive mode."
                         exit 0
                         ;;
-                    "help")
-                        display_help
-                        ;;
                     *)
-                        read -p "Enter additional parameters if any: " param1 param2
-                        run_script_command "$cmd" "$file" "$param1" "$param2"
+                        PS3="Please select a command: "
+                        select cmd in "type" "copy" "copy!" "ren" "ren!" "move" "move!" "del" "help" "Quit"; do
+                            case $cmd in
+                                "Quit")
+                                    echo "Exiting interactive mode."
+                                    exit 0
+                                    ;;
+                                "help")
+                                    display_help
+                                    ;;
+                                *)
+                                    read -p "Enter additional parameters if any: " param1 param2
+                                    run_script_command "$cmd" "$file" "$param1" "$param2"
+                                    break
+                                    ;;
+                            esac
+                        done
                         break
                         ;;
                 esac
