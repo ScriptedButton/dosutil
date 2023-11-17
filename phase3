@@ -2,7 +2,7 @@
 
 # Cole Brooks
 # A simple Bash script used to streamline common functions in Linux.
-# Last Rev. 11/8/2023
+# Last Rev. 11/16/2023
 # command - the command to invoke within dosutil
 # param1 - the first command parameter
 # param2 - the second command parameter
