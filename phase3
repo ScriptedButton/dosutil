@@ -146,13 +146,13 @@ delete_file() {
 list_and_sort_files() {
     local sort_option=$1
     case $sort_option in
-        name)
+        NAME)
             files=($(ls -1 | sort))
             ;;
-        age)
+        AGE)
             files=($(ls -1t))
             ;;
-        size)
+        SIZE)
             files=($(ls -1S))
             ;;
         *)
@@ -180,17 +180,27 @@ fi
 
 # Interactive mode
 echo "Entering interactive mode..."
-PS3="Please select a sorting option: "
 
-select sort_option in "name" "age" "size" "Quit"; do
+sorting_options=(NAME AGE SIZE)
+
+echo "-- SORTING SELECTION --"
+PS3=$'-- SORTING SELECTION --
+
+Please select a sorting option: '
+
+
+select sort_option in ${sorting_options[*]} "QUIT"; do
     case $sort_option in
-        "Quit")
+        "QUIT")
             echo "Exiting interactive mode."
             exit 0
             ;;
         *)
             list_and_sort_files "$sort_option"
-            PS3="Please select a file or directory: "
+            echo "Sorting by $sort_option..."
+            clear
+            echo -"-- DIRECTORY LISTING --"
+            PS3=$'-- DIRECTORY LISTING\n\nPlease select a file or directory: '
             select file in "${files[@]}" "Quit"; do
                 case $file in
                     "Quit")
